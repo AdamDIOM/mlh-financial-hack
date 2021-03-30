@@ -1,98 +1,67 @@
 import Head from 'next/head'
+import { promises as fs } from 'fs'
+import path from 'path'
+import Papa from 'papaparse'
 
-export default function Home() {
+export async function getStaticProps(){
+  const filePath = path.join(process.cwd(), 'data/transactions.csv');
+  const fileContents = await fs.readFile(filePath, 'utf8');
+  return {
+    props: {
+      rawFileContents: fileContents,
+      transactions: Papa.parse(fileContents, {
+      header: true,
+      delimiter: ","
+    }).data
+    }
+  }
+}
+
+export default function Home({transactions, rawFileContents}) {
+  console.log(transactions)
+  //console.log(rawFileContents)
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Major Leageu Banking</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet" />
+
       </Head>
 
       <main>
-        <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className="description">
-          Get started by editing <code>pages/index.js</code>
-        </p>
-
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+        <header>
+          <h1>
+            <span className="header-title-red">Major</span>
+            <span className="header-title-blue">League</span>
+            <span className="header-title-yellow">Banking</span>
+            </h1>
+        </header>
+        <div className="transactions">
+          {transactions.map(transaction => (
+            <Transaction
+            date={transaction.Date}
+            amount={transaction.Amount}
+            merchant={transaction.Description}
+            key={`${transaction.Date}-${transaction.Amount}-${Math.random}`}/>
+          ) )}
         </div>
       </main>
-
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className="logo" />
-        </a>
-      </footer>
 
       <style jsx>{`
         .container {
           min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+          padding:0;
           align-items: center;
         }
 
         main {
-          padding: 5rem 0;
+          text-align: center;
+          width:100%;
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer img {
-          margin-left: 0.5rem;
-        }
-
-        footer a {
-          display: flex;
           justify-content: center;
           align-items: center;
         }
@@ -102,32 +71,6 @@ export default function Home() {
           text-decoration: none;
         }
 
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
-
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
-        }
-
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
-
-        .title,
-        .description {
-          text-align: center;
-        }
-
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
 
         code {
           background: #fafafa;
@@ -138,56 +81,32 @@ export default function Home() {
             DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
         }
 
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
+        h1{
+          font-size:48px;
+          display:flex;
+          flex-direction: column;
+          margin:20px 0;
         }
 
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
+        .header-title-red{
+          color:#e73427;
+        }
+        .header-title-blue{
+          color:#1d539f;
+        }
+        .header-title-yellow{
+          color:#f8b92a;
         }
 
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
+        header{
+          background-color:#333333;
+          width:100%;
+          position:sticky;
+          top:0px;
         }
 
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
+        .
 
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        .logo {
-          height: 1em;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
-        }
       `}</style>
 
       <style jsx global>{`
@@ -195,9 +114,7 @@ export default function Home() {
         body {
           padding: 0;
           margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
+          font-family: 'Luckiest Guy', cursive;
         }
 
         * {
@@ -205,5 +122,62 @@ export default function Home() {
         }
       `}</style>
     </div>
+  )
+}
+
+function Transaction({date, amount, merchant}){
+
+  return(
+    <>
+    <div className="transaction">
+      <div className="merchant">{merchant}</div>
+      <div className="date">{date}</div>
+      <div className="amount">{amount}</div>
+    </div>
+
+    <style jsx>{`
+    
+    .transaction{
+        display:grid;
+        grid-template-areas: "merchant amount"
+                             "date amount";
+        grid-template-columns:1fr 100px;
+        background-color:#333333;
+        color:#bbbbbb;
+        font-family: 'Roboto', sans-serif;
+        text-align:left;
+    }
+    .transaction::after{
+      content:'';
+      background:red;
+      display:block;
+      height:3px;
+      width:180px;
+      left: calc(50% - 90px/2);
+      position:relative;
+
+    }
+    .merchant{
+      grid-area:merchant;
+      padding:6px 6px 6px 16px;
+    }
+
+    .date{
+      grid-area:date;
+      padding:6px 6px 6px 16px;
+    }
+    
+    .amount{
+      grid-area:amount;
+      padding:6px 16px 6px 6px;
+      /*display:flex;*/
+      align-items:center;
+      font-family:'Roboto Mono', monospace;
+      text-align:right;
+      justify-content:end;
+    }
+
+    `}</style>
+    </>
   )
 }
